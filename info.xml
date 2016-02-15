@@ -1,23 +1,21 @@
 <?xml version="1.0"?>
-<extension key="com.aghstrategies.uscounties" type="module">
+<extension key="com.aghstrategies.moroccoprovinces" type="module">
   <file>uscounties</file>
-  <name>US County Loader</name>
-  <description>Loads counties of the United States</description>
+  <description>Loads provinces of Morocco</description>
+  <name>Morocco Province Loader</name>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Andrew Hunt</author>
     <email>andrew@aghstrategies.com</email>
   </maintainer>
-  <releaseDate>2015-06-03</releaseDate>
-  <version>1.1</version>
-  <develStage>stable</develStage>
+  <releaseDate>2016-02-11</releaseDate>
+  <version>1.0</version>
+  <develStage>beta</develStage>
   <urls>
-	  <url desc="documentation">http://aghstrategies.com/counties</url>
+    <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
   <compatibility>
-    <ver>4.4</ver>
-    <ver>4.5</ver>
     <ver>4.6</ver>
   </compatibility>
-  <comments>Use this extension to load counties for the United States.  After installation, this extension does nothing (and can even be disabled).</comments>
+  <comments>Use this extension to load provinces for Morocco.  After installation, this extension does nothing (and can even be disabled).</comments>
 </extension>
