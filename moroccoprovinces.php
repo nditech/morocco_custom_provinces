@@ -180,7 +180,7 @@ function moroccoprovinces_loadProvinces() {
   foreach ($statesToAdd as $state) {
     $stateE = $dao->escape($state);
     $abbr = $dao->escape($stateConfig['states'][$state]);
-    $insert[] = "('$stateE', $abbr, {$stateConfig['countryIso']})";
+    $insert[] = "('$stateE', $abbr, {$result['id']})";
   }
 
   // Put it into queries of 50 states each.
