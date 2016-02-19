@@ -102,7 +102,7 @@ function moroccoprovinces_stateConfig() {
 }
 
 /**
- * Check and load counties.
+ * Check and load states/provinces.
  *
  * @return bool
  *   Success true/false.
@@ -133,7 +133,7 @@ function moroccoprovinces_loadProvinces() {
   catch (CiviCRM_API3_Exception $e) {
     $error = $e->getMessage();
     CRM_Core_Error::debug_log_message(ts('API Error: %1', array(
-      'domain' => 'com.aghstrategies.uscounties',
+      'domain' => 'com.aghstrategies.moroccoprovinces',
       1 => $error,
     )));
     return FALSE;

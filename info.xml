@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <extension key="com.aghstrategies.moroccoprovinces" type="module">
-  <file>uscounties</file>
+  <file>moroccoprovinces</file>
   <description>Loads provinces of Morocco</description>
   <name>Morocco Province Loader</name>
   <license>AGPL-3.0</license>

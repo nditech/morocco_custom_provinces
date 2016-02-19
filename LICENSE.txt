@@ -1,5 +1,5 @@
-Package: com.aghstrategies.uscounties
-Copyright (C) 2014, Andrew Hunt <andrew@aghstrategies.com>
+Package: com.aghstrategies.moroccoprovinces
+Copyright (C) 2016, Andrew Hunt <andrew@aghstrategies.com>
 Licensed under the GNU Affero Public License 3.0 (below).
 
 -------------------------------------------------------------------------------
