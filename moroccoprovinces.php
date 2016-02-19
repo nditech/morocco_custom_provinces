@@ -154,10 +154,16 @@ function moroccoprovinces_loadProvinces() {
   foreach ($statesToAdd as $state => $abbr) {
     $sql = 'SELECT id FROM civicrm_state_province WHERE name = %1 AND country_id = %2 LIMIT 1';
     $stateParams = array(
-      1 => $state,
-      2 => $countryId,
+      1 => array(
+        $state,
+        'String',
+      ),
+      2 => array(
+        $countryId,
+        'Integer',
+      ),
     );
-    $foundState = CRM_Core_DAO::singleValueQuery($query, $stateParams);
+    $foundState = CRM_Core_DAO::singleValueQuery($sql, $stateParams);
 
     if ($foundState) {
       unset($statesToAdd[$state]);
