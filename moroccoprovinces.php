@@ -119,15 +119,12 @@ function moroccoprovinces_loadProvinces() {
     $dao = new CRM_Core_DAO();
   }
 
-  // Get array of states.
+  $statesToAdd = $stateConfig['states'];
+
   try {
-    $result = civicrm_api3('Country', 'getsingle', array(
+    $countryId = civicrm_api3('Country', 'getvalue', array(
+      'return' => 'id',
       'iso_code' => $stateConfig['countryIso'],
-      'api.Address.getoptions' => array(
-        'field' => 'state_province_id',
-        'country_id' => '$value.id',
-        'sequential' => 0,
-      ),
     ));
   }
   catch (CiviCRM_API3_Exception $e) {
@@ -139,67 +136,63 @@ function moroccoprovinces_loadProvinces() {
     return FALSE;
   }
 
-  if (empty($result['api.Address.getoptions']['values'])) {
-    return FALSE;
-  }
-  $states = $result['api.Address.getoptions']['values'];
-
-  $foundStates = $changedCaseStates = array();
-
-  // Walk through states to add/remove them.
-  foreach ($states as $key => $value) {
-    if (empty($stateConfig['states'][$value])) {
-      // No state found: check for rewrite.
-      if (!empty($stateConfig['rewrites'][$value])) {
-        // Rewrite the name.
-        $query = "UPDATE civicrm_state_province SET name = %1 WHERE id = %2";
-        $params = array(
-          1 => $stateConfig['rewrites'][$value],
-          2 => $key,
-        );
-        $foundStates[] = $stateConfig['rewrites'][$value];
-      }
-      else {
-        // Check if it's just capitalization:
-        if (empty($stateConfig['lowerStates'])) {
-          foreach ($stateConfig['states'] as $stateName => $stateAbbr) {
-            $stateConfig['lowerStates'][strtolower($stateName)] = $stateAbbr;
-          }
-        }
-        $lowerState = strtolower($value);
-        if (!empty($stateConfig['lowerStates'][$lowerState])) {
-          // Found state with only caps difference; keep it as-is.
-          $changedCaseStates[] = $lowerState;
-          continue;
-        }
-
-        // No rewrite--maybe overwrite?
-        if (!empty($stateConfig['overwrite'])) {
-          // NOTICE: this could cause data loss: only use `overwrite` on fresh
-          // databases.
-          $query = "DELETE FROM civicrm_state_province WHERE id = %1";
-          $params = array(
-            1 => $key,
-          );
-        }
-      }
-    }
-    else {
-      $foundStates[] = $value;
+  // Rewrite states.
+  if (!empty($stateConfig['rewrites'])) {
+    foreach ($stateConfig['rewrites'] as $old => $new) {
+      $sql = 'UPDATE civicrm_state_province SET name = %1 WHERE name = %2 and country_id = %3';
+      $stateParams = array(
+        1 => $dao->escape($new),
+        2 => $dao->escape($old),
+        3 => $countryId,
+      );
+      CRM_Core_DAO::executeQuery($sql, $stateParams);
     }
   }
 
-  $statesToAdd = array_diff(array_keys($stateConfig['states']), $foundStates);
+  // Find states that are already there.
+  $stateIdsToKeep = array();
+  foreach ($statesToAdd as $state => $abbr) {
+    $sql = 'SELECT id FROM civicrm_state_province WHERE name = %1 AND country_id = %2 LIMIT 1';
+    $stateParams = array(
+      1 => $state,
+      2 => $countryId,
+    );
+    $foundState = CRM_Core_DAO::singleValueQuery($query, $stateParams);
 
-  $insert = array();
-  foreach ($statesToAdd as $state) {
-    // Don't add states that are simply caps variations.
-    if (in_array(strtolower($state), $changedCaseStates)) {
+    if ($foundState) {
+      unset($statesToAdd[$state]);
+      $stateIdsToKeep[] = $foundState;
       continue;
     }
+  }
+
+  // Wipe out states to remove.
+  if (!empty($stateConfig['overwrite'])) {
+    $sql = 'SELECT id FROM civicrm_state_province WHERE country_id = %1';
+    $dbStates = CRM_Core_DAO::executeQuery($sql, array(1 => $countryId));
+    $deleteIds = array();
+    while ($dbStates->fetch()) {
+      if (!in_array($dbStates->id, $stateIdsToKeep)) {
+        $deleteIds[] = $dbStates->id;
+      }
+    }
+
+    // Go delete the remaining old ones.
+    foreach ($deleteIds as $id) {
+      $sql = "DELETE FROM civicrm_state_province WHERE id = %1";
+      $params = array(
+        1 => $id,
+      );
+      CRM_Core_DAO::executeQuery($sql, $params);
+    }
+  }
+
+  // Add new states.
+  $insert = array();
+  foreach ($statesToAdd as $state => $abbr) {
     $stateE = $dao->escape($state);
-    $abbr = $dao->escape($stateConfig['states'][$state]);
-    $insert[] = "('$stateE', $abbr, {$result['id']})";
+    $abbrE = $dao->escape($abbr);
+    $insert[] = "('$stateE', '$abbrE', $countryId)";
   }
 
   // Put it into queries of 50 states each.
