@@ -144,7 +144,7 @@ function moroccoprovinces_loadProvinces() {
   }
   $states = $result['api.Address.getoptions']['values'];
 
-  $foundStates = array();
+  $foundStates = $changedCaseStates = array();
 
   // Walk through states to add/remove them.
   foreach ($states as $key => $value) {
@@ -159,14 +159,29 @@ function moroccoprovinces_loadProvinces() {
         );
         $foundStates[] = $stateConfig['rewrites'][$value];
       }
-      // No rewrite--maybe overwrite?
-      elseif (!empty($stateConfig['overwrite'])) {
-        // NOTICE: this could cause data loss: only use `overwrite` on fresh
-        // databases.
-        $query = "DELETE FROM civicrm_state_province WHERE id = %1";
-        $params = array(
-          1 => $key,
-        );
+      else {
+        // Check if it's just capitalization:
+        if (empty($stateConfig['lowerStates'])) {
+          foreach ($stateConfig['states'] as $stateName => $stateAbbr) {
+            $stateConfig['lowerStates'][strtolower($stateName)] = $stateAbbr;
+          }
+        }
+        $lowerState = strtolower($value);
+        if (!empty($stateConfig['lowerStates'][$lowerState])) {
+          // Found state with only caps difference; keep it as-is.
+          $changedCaseStates[] = $lowerState;
+          continue;
+        }
+
+        // No rewrite--maybe overwrite?
+        if (!empty($stateConfig['overwrite'])) {
+          // NOTICE: this could cause data loss: only use `overwrite` on fresh
+          // databases.
+          $query = "DELETE FROM civicrm_state_province WHERE id = %1";
+          $params = array(
+            1 => $key,
+          );
+        }
       }
     }
     else {
@@ -178,6 +193,10 @@ function moroccoprovinces_loadProvinces() {
 
   $insert = array();
   foreach ($statesToAdd as $state) {
+    // Don't add states that are simply caps variations.
+    if (in_array(strtolower($state), $changedCaseStates)) {
+      continue;
+    }
     $stateE = $dao->escape($state);
     $abbr = $dao->escape($stateConfig['states'][$state]);
     $insert[] = "('$stateE', $abbr, {$result['id']})";
