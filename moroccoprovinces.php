@@ -141,9 +141,18 @@ function moroccoprovinces_loadProvinces() {
     foreach ($stateConfig['rewrites'] as $old => $new) {
       $sql = 'UPDATE civicrm_state_province SET name = %1 WHERE name = %2 and country_id = %3';
       $stateParams = array(
-        1 => $dao->escape($new),
-        2 => $dao->escape($old),
-        3 => $countryId,
+        1 => array(
+          $new,
+          'String',
+        ),
+        2 => array(
+          $old,
+          'String',
+        ),
+        3 => array(
+          $countryId,
+          'Integer',
+        ),
       );
       CRM_Core_DAO::executeQuery($sql, $stateParams);
     }
@@ -175,7 +184,13 @@ function moroccoprovinces_loadProvinces() {
   // Wipe out states to remove.
   if (!empty($stateConfig['overwrite'])) {
     $sql = 'SELECT id FROM civicrm_state_province WHERE country_id = %1';
-    $dbStates = CRM_Core_DAO::executeQuery($sql, array(1 => $countryId));
+    $params = array(
+      1 => array(
+        $countryId,
+        'Integer',
+      ),
+    );
+    $dbStates = CRM_Core_DAO::executeQuery($sql, $params);
     $deleteIds = array();
     while ($dbStates->fetch()) {
       if (!in_array($dbStates->id, $stateIdsToKeep)) {
@@ -187,7 +202,10 @@ function moroccoprovinces_loadProvinces() {
     foreach ($deleteIds as $id) {
       $sql = "DELETE FROM civicrm_state_province WHERE id = %1";
       $params = array(
-        1 => $id,
+        1 => array(
+          $id,
+          'Integer',
+        ),
       );
       CRM_Core_DAO::executeQuery($sql, $params);
     }
