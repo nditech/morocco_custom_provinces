@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
-<extension key="com.aghstrategies.moroccoprovinces" type="module">
+<extension key="com.ndi.moroccoprovinces" type="module">
   <file>moroccoprovinces</file>
   <description>Loads provinces of Morocco</description>
   <name>Morocco Province Loader</name>
   <license>AGPL-3.0</license>
   <maintainer>
-    <author>Andrew Hunt</author>
-    <email>andrew@aghstrategies.com</email>
+    <author>Evan Summers</author>
+    <email>esummers@ndi.org</email>
   </maintainer>
   <releaseDate>2016-02-11</releaseDate>
   <version>1.0</version>
