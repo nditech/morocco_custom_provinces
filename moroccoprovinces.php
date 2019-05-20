@@ -303,5 +303,6 @@ function moroccoprovinces_civicrm_enable() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
  */
 function moroccoprovinces_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  moroccoprovinces_loadProvinces();
+  // Calling kenyastates_loadProvinces() from here was removed because
+  // it gets called whenever we run system.check, or open the Extension Manager.
 }
